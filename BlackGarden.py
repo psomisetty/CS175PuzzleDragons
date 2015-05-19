@@ -479,3 +479,8 @@ if __name__ == "__main__":
     (Board,BPath,matchedBoard)=game.makeMove(Board,CurX,CurY,toClearX,toClearY)
     game.printBoard(matchedBoard)
     game.printBoard(Board)
+
+
+
+
+    #asdfasf
