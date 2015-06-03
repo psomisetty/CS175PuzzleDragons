@@ -372,6 +372,8 @@ class BlackGarden:
                 Cube[0]=Cube[Max]
         C1=[]
         self.cubeInit(C1,Cube[Max][1],Cube[Max][2],Cube[Max][3],Cube[Max][0][-1])
+        self.cubeNext(C1)
+        self.cubeNext(C1)
         for i in range(0,len(C1)):
             C1[i][0]=Cube[Max][0]+C1[i][0]
             Cube.append(C1[i])
@@ -402,6 +404,7 @@ class BlackGarden:
        while 1:
            Cube=[]
            self.cubeInit(Cube,Board,CurX,CurY)
+           FLEH=0
            if self.UseAStar==1:
                Cube.insert(0,Cube[0])
            for i in range(0,self.movesInUnit):
@@ -411,8 +414,14 @@ class BlackGarden:
                    for j in range(0,3**i):
                        self.cubeNextAStar(Cube,toClearX,toClearY,BPath)
                        if len(Cube)>256:
-                           print("Migrating starting node to new optimum...")
                            break
+                   DINNER=Cube[self.maxIndex(Cube,toClearX,toClearY,BPath)]
+                   DINHEU=self.heuristic(DINNER[1],toClearX,toClearY)
+                   if DINHEU>FLEH:
+                       FLEH=DINHEU
+                       print("Migrating starting node to new optimum...",end="")
+                       print(DINHEU,end="")
+                       print(" Path="+DINNER[0])
            if self.UseAStar==0:
                Max = self.maxIndex(Cube,toClearX,toClearY,BPath)
            else:
@@ -443,7 +452,6 @@ class BlackGarden:
     def makeMove(self,Board,CurX,CurY,toClearX,toClearY):
        self.Damage=[0,0,0,0,0]
        (CurX,CurY)=self.startNode(Board,CurX,CurY,toClearX,toClearY)
-       #print("Starting at (",CurX,",",CurY,")")
        Orig=Board
        OX=CurX
        OY=CurY
@@ -458,7 +466,7 @@ class BlackGarden:
            print("\t"+str(self.Damage[i])+" "+self.ElementNames[i]+(" Mass" if self.FinMassAttack[i]>=1 else ""))
        for i in range(0, len(self.Damage)): self.Damage[i]=0
        self.HEURISTIC_CHOICE=0
-       return Board,BPath,matchedBoard
+       return Board,BPath,matchedBoard,OX,OY
 # -------------------- MAIN --------------------
 if __name__ == "__main__":
     #quick test
@@ -467,7 +475,7 @@ if __name__ == "__main__":
     Board = [[]]
     toClearX = []
     toClearY = []
-    game = BlackGarden(HEURISTIC_CHOICE=0,UseAStar=0)
+    game = BlackGarden(HEURISTIC_CHOICE=0,UseAStar=1)
     # I advise against implementing HEURISTIC_CHOICE=1 and UseAStar=1 at the same time, under the simple logic that
     # a human brain (UseAStar) cannot easily implement a clustering algorithm (HEURISTIC_CHOICE=1) unless severe
     # lookahead is used, so the machine ends up with bad short-term results.
@@ -476,11 +484,11 @@ if __name__ == "__main__":
        toClearY.append(-1)
     Board=game.boardInit(Board,toClearX,toClearY)
     game.printBoard(Board)
-    (Board,BPath,matchedBoard)=game.makeMove(Board,CurX,CurY,toClearX,toClearY)
-    game.printBoard(matchedBoard)
+    origBoard=Board
+    (Board,BPath,matchedBoard,OX,OY)=game.makeMove(Board,CurX,CurY,toClearX,toClearY)
+    game.printBoard(origBoard)
+    print("Started at (",str(OX),",",str(OY),")")
+    print(str(len(BPath))+" moves: "+BPath)
     game.printBoard(Board)
-
-
-
-
-    #asdfasf
+    x=input("Press [return] to see the path.")
+    game.incrementalReadout(BPath,origBoard,OX,OY)
